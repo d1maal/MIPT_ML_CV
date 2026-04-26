@@ -51,9 +51,14 @@ def affine_backward(dout, cache):
     x, w, b = cache
     dx, dw, db = None, None, None
     ###########################################################################
-    # TODO:  Реализуйте обратный проход полносвязного слоя.         
+    # TODO:  Реализуйте обратный проход полносвязного слоя.
     ###########################################################################
-    
+
+    x_reshaped = x.reshape(x.shape[0], -1)
+    dx = (dout @ w.T).reshape(x.shape)
+    dw = x_reshaped.T @ dout
+    db = dout.sum(axis=0)
+
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -95,10 +100,7 @@ def relu_backward(dout, cache):
     ###########################################################################
     # TODO: Реализуйте RELU на обраьном проходе
     ###########################################################################
-    #
-    ###########################################################################
-    #                             END OF YOUR CODE                            #
-    ###########################################################################
+    dx = dout * (x > 0)
     return dx
 
 
@@ -112,15 +114,20 @@ def softmax_loss(x, y):
     - loss: Скаляр, задающий функцию потерь
     - dx: Градиент функции потерь относительно x
     """
+
     loss, dx = None, None
 
-    ###########################################################################
-    # YOUR CODE
-    ###########################################################################
     
-    ###########################################################################
-    #                             END OF YOUR CODE                            #
-    ###########################################################################
+    shifted = x - x.max(axis=1, keepdims=True) #вычитаем максимум чтобы бесконечность не получать, keepdims для размерности (N,1), а не (N,)
+    exp_x = np.exp(shifted)
+    probs = exp_x / exp_x.sum(axis=1, keepdims=True)  # (N, C)
+
+    N = x.shape[0]
+    loss = -np.sum(np.log(probs[np.arange(N), y])) / N
+
+    dx = probs.copy()
+    dx[np.arange(N), y] -= 1
+    dx /= N
     return loss, dx
 
 def batchnorm_forward(x, gamma, beta, bn_param):
@@ -412,7 +419,29 @@ def conv_forward_naive(x, w, b, conv_param):
     # TODO: Напишите реализацию свертки прямого прохода.                         #
     # Hint: можно использовать np.pad для паддинга.                      #
     ###########################################################################
-    
+
+    stride = conv_param['stride']
+    pad = conv_param['pad']
+    N, C, H, W = x.shape
+    F, C, HH, WW = w.shape
+
+    H_out = 1 + (H + 2 * pad - HH) // stride
+    W_out = 1 + (W + 2 * pad - WW) // stride
+
+    # добавляем padding только по осям H и W (не по N и C)
+    x_padded = np.pad(x, ((0,0), (0,0), (pad,pad), (pad,pad)))
+
+    out = np.zeros((N, F, H_out, W_out))
+
+    for n in range(N):
+        for f in range(F):
+            for i in range(H_out):
+                for j in range(W_out):
+                    h_start = i * stride
+                    w_start = j * stride
+                    patch = x_padded[n, :, h_start:h_start+HH, w_start:w_start+WW]
+                    out[n, f, i, j] = np.sum(patch * w[f]) + b[f]
+
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -435,7 +464,34 @@ def conv_backward_naive(dout, cache):
     ###########################################################################
     # TODO: Реализация светки обратного прохода.                        #
     ###########################################################################
-    
+
+    x, w, b, conv_param = cache
+    stride = conv_param['stride']
+    pad = conv_param['pad']
+    N, C, H, W = x.shape
+    F, C, HH, WW = w.shape
+    N, F, H_out, W_out = dout.shape
+
+    x_padded = np.pad(x, ((0,0), (0,0), (pad,pad), (pad,pad)))
+    dx_padded = np.zeros_like(x_padded)
+    dw = np.zeros_like(w)
+    db = np.zeros_like(b)
+
+    for n in range(N):
+        for f in range(F):
+            for i in range(H_out):
+                for j in range(W_out):
+                    h_start = i * stride
+                    w_start = j * stride
+                    patch = x_padded[n, :, h_start:h_start+HH, w_start:w_start+WW]
+
+                    db[f] += dout[n, f, i, j]
+                    dw[f] += dout[n, f, i, j] * patch
+                    dx_padded[n, :, h_start:h_start+HH, w_start:w_start+WW] += dout[n, f, i, j] * w[f]
+
+    # убираем padding чтобы вернуть исходный размер x
+    dx = dx_padded[:, :, pad:-pad, pad:-pad]
+
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -466,7 +522,25 @@ def max_pool_forward_naive(x, pool_param):
     ###########################################################################
     # TODO: Implement the max-pooling forward pass                            #
     ###########################################################################
-    
+
+    N, C, H, W = x.shape
+    ph = pool_param['pool_height']
+    pw = pool_param['pool_width']
+    stride = pool_param['stride']
+
+    H_out = 1 + (H - ph) // stride
+    W_out = 1 + (W - pw) // stride
+    out = np.zeros((N, C, H_out, W_out))
+
+    for n in range(N):
+        for c in range(C):
+            for i in range(H_out):
+                for j in range(W_out):
+                    h_start = i * stride
+                    w_start = j * stride
+                    window = x[n, c, h_start:h_start+ph, w_start:w_start+pw]
+                    out[n, c, i, j] = np.max(window)
+
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -489,7 +563,28 @@ def max_pool_backward_naive(dout, cache):
     ###########################################################################
     # TODO: Implement the max-pooling backward pass                           #
     ###########################################################################
-    
+
+    x, pool_param = cache
+    N, C, H, W = x.shape
+    ph = pool_param['pool_height']
+    pw = pool_param['pool_width']
+    stride = pool_param['stride']
+
+    H_out = 1 + (H - ph) // stride
+    W_out = 1 + (W - pw) // stride
+    dx = np.zeros_like(x)
+
+    for n in range(N):
+        for c in range(C):
+            for i in range(H_out):
+                for j in range(W_out):
+                    h_start = i * stride
+                    w_start = j * stride
+                    window = x[n, c, h_start:h_start+ph, w_start:w_start+pw]
+                    # маска: True только там где был максимум
+                    mask = (window == np.max(window))
+                    dx[n, c, h_start:h_start+ph, w_start:w_start+pw] += mask * dout[n, c, i, j]
+
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
