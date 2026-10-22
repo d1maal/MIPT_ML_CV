@@ -1,0 +1,373 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=2cm]{geometry}
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{microtype}
+\usepackage{tabularx}
+
+\setmainlanguage{russian}
+\setotherlanguage{english}
+\setmainfont{Liberation Serif}
+\setsansfont{Liberation Sans}
+\setmonofont{Liberation Mono}
+
+\definecolor{ruleblue}{HTML}{1F4E79}
+\definecolor{rulegray}{HTML}{4A4A4A}
+\definecolor{warnred}{HTML}{8B1E1E}
+\definecolor{okgreen}{HTML}{1B5E20}
+\definecolor{boxbg}{HTML}{F4F7FB}
+\definecolor{warnbg}{HTML}{FFF4F0}
+\definecolor{okbg}{HTML}{F1F8F2}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=ruleblue,
+  urlcolor=ruleblue,
+  pdftitle={Робастная устойчивость и критерий Михайлова},
+  pdfauthor={MIPT notes}
+}
+
+\titleformat{\section}{\large\bfseries\color{ruleblue}}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\normalsize\bfseries\color{ruleblue}}{\thesubsection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.3em}{0.5em}
+\titlespacing*{\subsection}{0pt}{0.9em}{0.35em}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{rulegray} Робастная устойчивость}
+\fancyhead[R]{\small\color{rulegray} Критерий Михайлова}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+
+\setlist[enumerate]{leftmargin=1.6em,itemsep=0.25em,topsep=0.35em}
+\setlist[itemize]{leftmargin=1.4em,itemsep=0.2em,topsep=0.3em}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\jomega}{j\omega}
+
+\newtheorem*{rulebox}{Правило}
+
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries\color{ruleblue} Робастная устойчивость}\\[0.35em]
+  {\Large и критерий Михайлова}\\[0.6em]
+  {\large Основные правила решения задач}\\[0.4em]
+  {\normalsize\color{rulegray} МФТИ. Интервальные полиномы, годограф Михайлова, теорема Харитонова}
+\end{center}
+
+\vspace{0.4em}
+\noindent\textcolor{ruleblue}{\rule{\textwidth}{0.8pt}}
+
+\tableofcontents
+\vspace{0.3em}
+\noindent\textcolor{ruleblue}{\rule{\textwidth}{0.4pt}}
+
+%---------------------------------------------------------------------
+\section{Сначала получи характеристический полином}
+
+Для системы с отрицательной обратной связью
+\[
+W_{\mathrm{замк}}(s)=\frac{W_1(s)}{1+W_1(s)W_2(s)}.
+\]
+Устойчивость определяется нулями знаменателя:
+\[
+P(s)=1+W_1(s)W_2(s)=0.
+\]
+
+\paragraph{Практический приём.}
+Приведи \(W_1\) и \(W_2\) к дробям \(N/D\) и сложи над общим знаменателем.
+Характеристический полином --- это \textbf{числитель} суммы.
+
+Для типовой задачи
+\[
+W_1(s)=\frac{1}{s^2+a_1 s+a_2},\qquad
+W_2(s)=K_1+\frac{K_2}{s}=\frac{K_1 s+K_2}{s}
+\]
+сразу получается
+\[
+P(s)=s^3+a_1 s^2+(a_2+K_1)s+K_2.
+\]
+
+\begin{itemize}
+  \item Не работай с \(W(s)\) ``на глаз'' по схеме. Всегда своди задачу к полиному
+        \(P(s)=\alpha_n s^n+\cdots+\alpha_0\).
+  \item Михайлов и Харитонов применяются именно к \textbf{замкнутой} системе, то есть к \(P(s)\).
+  \item Член \(K_2/s\) поднимает степень: не забудь умножить на знаменатель \(W_2\).
+\end{itemize}
+
+%---------------------------------------------------------------------
+\section{Классический критерий Михайлова}
+
+Подставь \(s=\jomega\):
+\[
+P(\jomega)=U(\omega)+jV(\omega).
+\]
+
+\subsection{Как получить \texorpdfstring{\(U\) и \(V\)}{U и V}}
+
+Чётные степени \(s^{2k}\) идут в \(U\) со знаком \((-1)^k\);
+нечётные \(s^{2k+1}\) идут в \(V\) со знаком \((-1)^k\) и множителем \(\omega\).
+
+Для \(P(s)=s^3+\alpha s^2+\beta s+\gamma\):
+\[
+U(\omega)=\gamma-\alpha\omega^2,\qquad
+V(\omega)=\omega(\beta-\omega^2).
+\]
+
+Для \(P(s)=s^4+\alpha s^3+\beta s^2+\gamma s+\delta\):
+\[
+U(\omega)=\delta-\beta\omega^2+\omega^4,\qquad
+V(\omega)=\omega(\gamma-\alpha\omega^2).
+\]
+
+\subsection{Формулировка критерия}
+
+Система асимптотически устойчива, если при \(\omega:0\to+\infty\) годограф \(P(\jomega)\):
+\begin{enumerate}
+  \item начинается на \textbf{положительной вещественной оси}: \(U(0)>0\), \(V(0)=0\);
+  \item проходит \textbf{последовательно} \(n\) квадрантов против часовой стрелки:
+        \(\mathrm{I}\to\mathrm{II}\to\mathrm{III}\to\cdots\);
+  \item \textbf{не проходит через начало координат} (иначе есть корень на оси \(j\omega\));
+  \item уходит в бесконечность в нужном квадранте.
+\end{enumerate}
+
+Эквивалентно: \(\arg P(\jomega)\) монотонно растёт на \(\dfrac{n\pi}{2}\).
+
+\subsection{Типичные отказы годографа}
+
+\noindent
+\renewcommand{\arraystretch}{1.25}%
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Что видно на годографе} & \textbf{Вывод} \\
+\midrule
+Проходит через \(0\) & Граница устойчивости \\
+Пропускает квадрант / идёт по часовой & Неустойчивость \\
+Стартует не с \(U(0)>0\) & Не все коэффициенты положительны \\
+Возвращается в уже пройденный квадрант & Неустойчивость \\
+На границе \(\alpha\beta=\gamma\) (для \(n=3\)) годограф идёт в \(0\) & Нет асимптотической устойчивости \\
+\bottomrule
+\end{tabularx}
+
+\paragraph{Как искать пересечения осей.}
+\begin{itemize}
+  \item \(U(\omega)=0\), \(V(\omega)>0\) --- переход \(\mathrm{I}\to\mathrm{II}\);
+  \item \(V(\omega)=0\), \(U(\omega)<0\) --- переход \(\mathrm{II}\to\mathrm{III}\).
+\end{itemize}
+Если порядок пересечений ломается --- система неустойчива.
+
+%---------------------------------------------------------------------
+\section{Связь с критерием Гурвица}
+
+Для низкой степени Михайлов почти всегда сводится к неравенствам Гурвица.
+Их полезно знать наизусть и использовать как быструю проверку.
+
+\paragraph{Степень 2.}
+\(s^2+\alpha s+\beta\) устойчив \(\Leftrightarrow\) \(\alpha>0,\ \beta>0\).
+
+\paragraph{Степень 3.}
+\(s^3+\alpha s^2+\beta s+\gamma\) устойчив \(\Leftrightarrow\)
+\[
+\alpha>0,\quad \beta>0,\quad \gamma>0,\quad \alpha\beta>\gamma.
+\]
+На годографе условие \(\alpha\beta>\gamma\) означает: \(U\) меняет знак \textbf{раньше}, чем \(V\),
+то есть переход \(\mathrm{I}\to\mathrm{II}\) происходит при ещё положительном \(V\).
+
+\paragraph{Степень 4.}
+\(s^4+\alpha s^3+\beta s^2+\gamma s+\delta\) устойчив \(\Leftrightarrow\)
+\[
+\alpha,\beta,\gamma,\delta>0,\qquad
+\alpha\beta>\gamma,\qquad
+\alpha\beta\gamma-\alpha^2\delta-\gamma^2>0.
+\]
+
+\paragraph{Правило.}
+Для \(n\le 3\) сначала выпиши неравенства, потом подтверди их картинкой Михайлова.
+Для отчёта нужна именно картина годографа.
+Положительность всех коэффициентов --- только необходимое условие; для \(n\ge 3\) этого мало.
+
+%---------------------------------------------------------------------
+\section{Робастная постановка: интервальный полином}
+
+Параметры \(a_i,K_i\) заданы интервалами. Тогда коэффициенты \(P(s)\) тоже лежат в интервалах:
+\[
+P(s)=\sum_{k=0}^{n}\alpha_k s^k,\qquad
+\alpha_k\in[\underline{\alpha}_k,\overline{\alpha}_k].
+\]
+
+\subsection{Как пересчитывать интервалы коэффициентов}
+
+\begin{itemize}
+  \item Если коэффициент равен параметру, интервал тот же:
+        \(\alpha=a_1\in[1,2]\).
+  \item Если сумма независимых слагаемых:
+        \(\min(a_2+K_1)=\min a_2+\min K_1\),
+        \(\max(a_2+K_1)=\max a_2+\max K_1\).
+  \item Если произведение положительных:
+        \(\min(ab)=\min a\cdot\min b\),
+        \(\max(ab)=\max a\cdot\max b\).
+  \item Если параметр фиксирован (например \(K_2\in[3,3]\)), коэффициент --- \textbf{константа}.
+\end{itemize}
+
+\subsection{Независимость коэффициентов}
+
+Если разные коэффициенты зависят от \textbf{разных} параметров, они независимы,
+и можно брать все углы прямоугольника коэффициентов.
+
+Если один параметр входит в два коэффициента, не все углы достижимы.
+Тогда теорема Харитонова может быть консервативна: неустойчивый харитоновский полином
+может не соответствовать ни одному реальному набору параметров.
+В этом случае проверяй вершины и рёбра по \textbf{исходным} параметрам.
+
+%---------------------------------------------------------------------
+\section{Теорема Харитонова}
+
+Интервальный полином робастно устойчив тогда и только тогда, когда устойчивы
+\textbf{четыре} полинома Харитонова:
+\begin{align*}
+K_1(s)&=\underline{\alpha}_0+\underline{\alpha}_1 s+\overline{\alpha}_2 s^2+\overline{\alpha}_3 s^3+\underline{\alpha}_4 s^4+\cdots,\\
+K_2(s)&=\underline{\alpha}_0+\overline{\alpha}_1 s+\overline{\alpha}_2 s^2+\underline{\alpha}_3 s^3+\underline{\alpha}_4 s^4+\cdots,\\
+K_3(s)&=\overline{\alpha}_0+\underline{\alpha}_1 s+\underline{\alpha}_2 s^2+\overline{\alpha}_3 s^3+\overline{\alpha}_4 s^4+\cdots,\\
+K_4(s)&=\overline{\alpha}_0+\overline{\alpha}_1 s+\underline{\alpha}_2 s^2+\underline{\alpha}_3 s^3+\overline{\alpha}_4 s^4+\cdots.
+\end{align*}
+
+\paragraph{Мнемоника.}
+Коэффициенты чередуются парами ``мин--мин / макс--макс'', со сдвигом на один индекс.
+
+Каждый \(K_i\) проверяй критерием Михайлова (или Гурвица).
+
+\subsection{Как применять}
+
+\begin{enumerate}
+  \item Выпиши четыре полинома.
+  \item Если \textbf{хотя бы один} неустойчив --- семейство \textbf{не} робастно устойчиво.
+        Контрпример готов.
+  \item Если все четыре устойчивы \textbf{и} коэффициенты независимы ---
+        семейство робастно устойчиво.
+  \item Если коэффициенты зависимы --- Харитонов достаточен, но не всегда необходим.
+\end{enumerate}
+
+Для \(n=3\) часто хватает одного неравенства \(\alpha\beta>\gamma\) на самом ``плохом'' углу:
+сравни \(\min(\alpha\beta)=\underline\alpha\cdot\underline\beta\) с \(\overline\gamma\).
+
+%---------------------------------------------------------------------
+\section{Михайлов для семейства полиномов}
+
+Годографы всех полиномов семейства заполняют ``трубку''.
+Робастная устойчивость есть, если:
+\begin{itemize}
+  \item ни один годограф не проходит через \(0\);
+  \item все годографы идут по тем же \(n\) квадрантам, что и номинальный устойчивый.
+\end{itemize}
+
+На практике проверяют граничные (экстремальные) полиномы: углы интервального прямоугольника.
+Для независимых коэффициентов это как раз харитоновские полиномы.
+
+%---------------------------------------------------------------------
+\section{Алгоритм решения задачи с доски}
+
+\begin{enumerate}
+  \item По схеме выписать \(W_1(s)\) и \(W_2(s)\).
+  \item Найти \(P(s)=1+W_1 W_2\), привести к полиному.
+  \item Записать интервалы коэффициентов \(\alpha_k\).
+  \item Проверить необходимое условие: все \(\alpha_k>0\) на всём семействе.
+        Если какой-то коэффициент может быть \(\le 0\) --- сразу неустойчивость.
+  \item Составить четыре полинома Харитонова.
+  \item Для каждого построить \(U(\omega)\), \(V(\omega)\) и проверить порядок квадрантов
+        (или применить Гурвиц).
+  \item Если всё устойчиво --- система \textbf{робастно устойчива}.
+        Если нет --- указать конкретный набор \(a_i,K_i\) (контрпример)
+        и показать, как ломается годограф Михайлова.
+  \item По желанию выписать область устойчивости внутри бокса параметров,
+        например \(a_1(a_2+K_1)>K_2\).
+\end{enumerate}
+
+%---------------------------------------------------------------------
+\section{Разобранный пример}
+
+Дано:
+\[
+W_1(s)=\frac{1}{s^2+a_1 s+a_2},\qquad
+W_2(s)=K_1+\frac{K_2}{s},
+\]
+\[
+a_1\in[1,2],\quad
+a_2\in[2,3],\quad
+K_1\in[0;2{,}5],\quad
+K_2=3.
+\]
+
+\subsection{Характеристический полином}
+\[
+P(s)=s^3+a_1 s^2+(a_2+K_1)s+3.
+\]
+Интервалы коэффициентов:
+\[
+\alpha=a_1\in[1,2],\qquad
+\beta=a_2+K_1\in[2;5{,}5],\qquad
+\gamma=3.
+\]
+
+\subsection{Условие Михайлова / Гурвица}
+\[
+a_1>0,\quad a_2+K_1>0,\quad a_1(a_2+K_1)>3.
+\]
+
+\subsection{Робастная проверка}
+\[
+\min a_1(a_2+K_1)=1\cdot 2=2<3.
+\]
+Семейство \textbf{не} робастно устойчиво.
+
+\paragraph{Контрпример:}
+\(a_1=1\), \(a_2=2\), \(K_1=0\), \(K_2=3\):
+\[
+P(s)=s^3+s^2+2s+3,\qquad
+U=3-\omega^2,\qquad
+V=\omega(2-\omega^2).
+\]
+При \(\omega=\sqrt{2}\) имеем \(V=0\), \(U=1>0\): возврат на положительную вещественную ось
+и уход в IV квадрант вместо II. По Михайлову система неустойчива.
+
+По Харитонову один из четырёх полиномов --- как раз \(s^3+s^2+2s+3\) --- неустойчив,
+поэтому семейство не робастно устойчиво.
+
+\subsection{Область устойчивости внутри бокса}
+Система устойчива только при \(a_1(a_2+K_1)>3\).
+Например, при \(a_1=2\) --- на всём \([a_2,K_1]\);
+при \(a_1=1\) --- лишь при \(a_2+K_1>3\).
+
+%---------------------------------------------------------------------
+\section{Частые ловушки}
+
+\begin{itemize}
+  \item Забыть умножить на знаменатель \(W_2\) (член \(K_2/s\) даёт лишний множитель \(s\)).
+  \item Считать \(K_2\in[3,3]\) интервалом --- это константа.
+  \item Верно брать \(\min(a_2+K_1)=\min a_2+\min K_1\), но забыть, что
+        \(\max=\max a_2+\max K_1\).
+  \item Путать устойчивость разомкнутой и замкнутой систем.
+        Михайлов --- про замкнутую, то есть про \(P(s)\).
+  \item Считать, что ``все коэффициенты положительны'' означает устойчивость.
+        Для \(n\ge 3\) нужно ещё условие \(\alpha\beta>\gamma\).
+  \item На границе \(\alpha\beta=\gamma\) годограф проходит через \(0\) ---
+        это \textbf{не} асимптотическая устойчивость.
+\end{itemize}
+
+\vspace{1.2em}
+\noindent\textcolor{ruleblue}{\rule{\textwidth}{0.6pt}}\\[0.4em]
+{\small\color{rulegray}
+Краткая шпаргалка. Для задачи с доски достаточно: \(P(s)\) \(\to\) интервалы \(\alpha_k\) \(\to\)
+четыре полинома Харитонова \(\to\) годограф Михайлова / неравенства Гурвица \(\to\)
+вердикт о робастной устойчивости и контрпример при отказе.}
+
+\end{document}

@@ -33,3 +33,8 @@ Homeworks/hw2/classifiers/rnn_pytorch.py
 Homeworks/hw2/datasets/cifar-10-python.tar.gz
 Homeworks/hw2/utils/__pycache__/*
 hw-solved/*
+notes/*.log
+notes/*.aux
+notes/*.out
+notes/*.toc
+notes/*.xdv
